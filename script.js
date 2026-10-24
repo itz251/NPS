@@ -44,8 +44,9 @@ function loadHomeData() {
         });
 
     // 3. Gallery
-    fetch('http://localhost:3000/api/gallery')
-        .then(res => res.json())
+   // fetch('http://localhost:3000/api/gallery')
+   fetch('/api/gallery')  
+   .then(res => res.json())
         .then(gallery => {
             let container = document.getElementById('home-gallery-container');
             if (!container) return;
