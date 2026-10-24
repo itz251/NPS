@@ -87,7 +87,8 @@
         }
 
         document.addEventListener("DOMContentLoaded", function() {
-            fetch('http://localhost:3000/api/gallery')
+           // fetch('http://localhost:3000/api/gallery')
+            fetch('/api/gallery')
                 .then(res => res.json())
                 .then(gallery => {
                     let container = document.getElementById('full-gallery-container');
