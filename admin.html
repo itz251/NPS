@@ -28,7 +28,7 @@
         <!-- Login Box -->
         <div id="admin-login" class="admin-box">
             <h3>Admin Login</h3>
-            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Username: <b>admin</b> | Password: <b>1234</b></p>
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Username: <b></b> | Password: <b></b></p>
             <div class="form-group"><label>Username</label><input type="text" id="user"></div>
             <div class="form-group"><label>Password</label><input type="password" id="pass"></div>
             <button class="btn-submit" onclick="login()">Login</button>
@@ -96,7 +96,8 @@
             if(!title || !time || !desc) { alert('Sabhi fields bharein!'); return; }
 
             let method = editId ? 'PUT' : 'POST';
-            let url = editId ? `http://localhost:3000/api/events/${editId}` : 'http://localhost:3000/api/events';
+        //    let url = editId ? `http://localhost:3000/api/events/${editId}` : 'http://localhost:3000/api/events';
+             let url = editId ? `/api/events/${editId}` : '/api/events';
 
             fetch(url, {
                 method: method,
@@ -115,8 +116,9 @@
 
         function loadAdminData() {
             // Load Events
-            fetch('http://localhost:3000/api/events')
-            .then(res => res.json())
+           // fetch('http://localhost:3000/api/events')
+           fetch('/api/events')  
+           .then(res => res.json())
             .then(events => {
                 let list = document.getElementById('admin-events-list');
                 list.innerHTML = '<h4>Manage Events</h4>';
@@ -132,7 +134,8 @@
             });
 
             // Load Gallery (Photos & Videos with Delete Button)
-            fetch('http://localhost:3000/api/gallery')
+           // fetch('http://localhost:3000/api/gallery')
+           fetch('/api/gallery')
             .then(res => res.json())
             .then(gallery => {
                 let list = document.getElementById('admin-gallery-list');
@@ -164,7 +167,8 @@
 
         function deleteEvent(id) {
             if(confirm('Event delete karna chahte hain?')) {
-                fetch(`http://localhost:3000/api/events/${id}`, {method: 'DELETE'}).then(() => loadAdminData());
+              // fetch(`http://localhost:3000/api/events/${id}`, {method: 'DELETE'}).then(() => loadAdminData());
+              fetch(`/api/events/${id}`, {method: 'DELETE'}).then(() => loadAdminData());
             }
         }
 
@@ -175,8 +179,9 @@
             let formData = new FormData();
             formData.append('photo', fileInput.files[0]);
 
-            fetch('http://localhost:3000/api/gallery', {
-                method: 'POST',
+           // fetch('http://localhost:3000/api/gallery', {
+           fetch('/api/gallery')  
+           method: 'POST',
                 body: formData
             }).then(res => res.json()).then(() => {
                 alert('Photo upload ho gayi!');
@@ -189,8 +194,9 @@
             let url = document.getElementById('youtube-url').value;
             if(!url) { alert('Kripya YouTube URL darj karein!'); return; }
 
-            fetch('http://localhost:3000/api/gallery/video', {
-                method: 'POST',
+           // fetch('http://localhost:3000/api/gallery/video', {
+           fetch('/api/gallery/video')  
+           method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ url })
             }).then(res => res.json()).then(() => {
@@ -202,7 +208,8 @@
             
         function deleteItem(id) {
             if(confirm('Isse delete karna chahte hain?')) {
-                fetch(`http://localhost:3000/api/gallery/${id}`, {method: 'DELETE'}).then(() => loadAdminData());
+              // fetch(`http://localhost:3000/api/gallery/${id}`, {method: 'DELETE'}).then(() => loadAdminData());
+              fetch(`/api/gallery/${id}`, {method: 'DELETE'}).then(() => loadAdminData());
             }
         }
     </script>
