@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Navayerusalem</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo">Navayerusalem Foundation</a>
+        <div class="menu-toggle" onclick="toggleMenu()"><i class="fa fa-bars"></i></div>
+        <ul class="nav-links" id="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="admin.html"><i class="fa fa-lock"></i> Admin</a></li>
+        </ul>
+    </nav>
+
+    <div class="section">
+        <h2 class="section-title">Admin Dashboard</h2>
+        
+        <!-- Login Box -->
+        <div id="admin-login" class="admin-box">
+            <h3>Admin Login</h3>
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Username: <b>admin</b> | Password: <b>1234</b></p>
+            <div class="form-group"><label>Username</label><input type="text" id="user"></div>
+            <div class="form-group"><label>Password</label><input type="password" id="pass"></div>
+            <button class="btn-submit" onclick="login()">Login</button>
+        </div>
+
+        <!-- Dashboard Controls (Ye login ke baad hi dikhega) -->
+        <div id="admin-controls" class="admin-box" style="display: none;">
+            <h3 style="color: #27ae60; margin-bottom: 15px;"><i class="fa fa-check-circle"></i> Logged In Successfully</h3>
+            
+            <h4>Post / Update Event</h4>
+            <div class="form-group"><label>Event Title</label><input type="text" id="ev-title"></div>
+            <div class="form-group"><label>Date & Time</label><input type="text" id="ev-time"></div>
+            <div class="form-group"><label>Description</label><textarea id="ev-desc"></textarea></div>
+            <button class="btn-submit" id="ev-btn" onclick="saveEvent()">Post Event</button>
+            
+            <div id="admin-events-list" style="margin-top: 20px;"></div>
+
+            <hr style="margin: 30px 0;">
+
+            <h4>Upload Photo from Device (Laptop/Phone)</h4>
+            <div class="form-group"><label>Select Image File</label><input type="file" id="photo-file" accept="image/*"></div>
+            <button class="btn-submit" onclick="uploadPhoto()">Upload Photo</button>
+
+            <hr style="margin: 30px 0;">
+
+            <h4>Upload YouTube Video Link</h4>
+            <div class="form-group">
+                <label>YouTube Video URL</label>
+                <input type="text" id="youtube-url" placeholder="Jaise: https://www.youtube.com/watch?v=xxxxx">
+            </div>
+            <button class="btn-submit" onclick="uploadYouTubeVideo()">Add YouTube Video</button>
+
+            <h4 style="margin-top: 20px;">Manage Gallery (Photos & Videos)</h4>
+            <div id="admin-gallery-list" style="margin-top: 10px; display:flex; gap:10px; flex-wrap:wrap;"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Navayerusalem Prarthana Sabha Foundation. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function toggleMenu() {
+            document.getElementById('nav-links').classList.toggle('show');
+        }
+
+        function login() {
+            let u = document.getElementById('user').value;
+            let p = document.getElementById('pass').value;
+            if(u === 'admin' && p === '1234') {
+                document.getElementById('admin-login').style.display = 'none';
+                document.getElementById('admin-controls').style.display = 'block';
+                loadAdminData();
+            } else { 
+                alert('Galat username ya password!'); 
+            }
+        }
+
+        let editId = null;
+
+        function saveEvent() {
+            let title = document.getElementById('ev-title').value;
+            let time = document.getElementById('ev-time').value;
+            let desc = document.getElementById('ev-desc').value;
+            if(!title || !time || !desc) { alert('Sabhi fields bharein!'); return; }
+
+            let method = editId ? 'PUT' : 'POST';
+            let url = editId ? `http://localhost:3000/api/events/${editId}` : 'http://localhost:3000/api/events';
+
+            fetch(url, {
+                method: method,
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({title, time, desc})
+            }).then(() => {
+                alert('Event save ho gaya!');
+                editId = null;
+                document.getElementById('ev-btn').innerText = 'Post Event';
+                document.getElementById('ev-title').value = '';
+                document.getElementById('ev-time').value = '';
+                document.getElementById('ev-desc').value = '';
+                loadAdminData();
+            });
+        }
+
+        function loadAdminData() {
+            // Load Events
+            fetch('http://localhost:3000/api/events')
+            .then(res => res.json())
+            .then(events => {
+                let list = document.getElementById('admin-events-list');
+                list.innerHTML = '<h4>Manage Events</h4>';
+                events.forEach(ev => {
+                    list.innerHTML += `<div style="background:#f9f9f9; padding:8px; margin-top:5px; border:1px solid #ddd; display:flex; justify-content:space-between; align-items:center;">
+                        <span><b>${ev.title}</b></span>
+                        <div>
+                            <button onclick="editEvent(${ev.id}, '${ev.title}', '${ev.time}', '${ev.desc}')" style="background:#3498db; color:white; border:none; padding:4px 8px; cursor:pointer;">Edit</button>
+                            <button onclick="deleteEvent(${ev.id})" style="background:#e74c3c; color:white; border:none; padding:4px 8px; cursor:pointer;">Delete</button>
+                        </div>
+                    </div>`;
+                });
+            });
+
+            // Load Gallery (Photos & Videos with Delete Button)
+            fetch('http://localhost:3000/api/gallery')
+            .then(res => res.json())
+            .then(gallery => {
+                let list = document.getElementById('admin-gallery-list');
+                list.innerHTML = '';
+                gallery.forEach(item => {
+                    if(item.type === 'video') {
+                        list.innerHTML += `<div style="position:relative; width:120px; height:80px; background:#000; border-radius:4px; overflow:hidden;">
+                            <iframe src="${item.url}" style="width:100%; height:100%; border:none;" pointer-events="none"></iframe>
+                            <button onclick="deleteItem(${item.id})" style="position:absolute; top:2px; right:2px; background:red; color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:12px; cursor:pointer; z-index:10;">×</button>
+                        </div>`;
+                    } else {
+                        list.innerHTML += `<div style="position:relative; width:80px; height:80px;">
+                            <img src="${item.url}" style="width:100%; height:100%; object-fit:cover; border-radius:4px;">
+                            <button onclick="deleteItem(${item.id})" style="position:absolute; top:2px; right:2px; background:red; color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:12px; cursor:pointer;">×</button>
+                        </div>`;
+                    }
+                });
+            });
+        }
+
+        function editEvent(id, title, time, desc) {
+            document.getElementById('ev-title').value = title;
+            document.getElementById('ev-time').value = time;
+            document.getElementById('ev-desc').value = desc;
+            editId = id;
+            document.getElementById('ev-btn').innerText = 'Update Event';
+            window.scrollTo({top:0, behavior:'smooth'});
+        }
+
+        function deleteEvent(id) {
+            if(confirm('Event delete karna chahte hain?')) {
+                fetch(`http://localhost:3000/api/events/${id}`, {method: 'DELETE'}).then(() => loadAdminData());
+            }
+        }
+
+        function uploadPhoto() {
+            let fileInput = document.getElementById('photo-file');
+            if(fileInput.files.length === 0) { alert('Pehle photo select karein!'); return; }
+            
+            let formData = new FormData();
+            formData.append('photo', fileInput.files[0]);
+
+            fetch('http://localhost:3000/api/gallery', {
+                method: 'POST',
+                body: formData
+            }).then(res => res.json()).then(() => {
+                alert('Photo upload ho gayi!');
+                fileInput.value = '';
+                loadAdminData();
+            });
+        }
+        
+        function uploadYouTubeVideo() {
+            let url = document.getElementById('youtube-url').value;
+            if(!url) { alert('Kripya YouTube URL darj karein!'); return; }
+
+            fetch('http://localhost:3000/api/gallery/video', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ url })
+            }).then(res => res.json()).then(() => {
+                alert('YouTube video successfully add ho gayi hai!');
+                document.getElementById('youtube-url').value = '';
+                loadAdminData();
+            });
+        }
+            
+        function deleteItem(id) {
+            if(confirm('Isse delete karna chahte hain?')) {
+                fetch(`http://localhost:3000/api/gallery/${id}`, {method: 'DELETE'}).then(() => loadAdminData());
+            }
+        }
+    </script>
+</body>
+</html>
