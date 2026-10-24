@@ -8,8 +8,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
 function loadHomeData() {
     // 1. Events
-    fetch('http://localhost:3000/api/events')
-        .then(res => res.json())
+   // fetch('http://localhost:3000/api/events')
+   fetch('/api/events')  
+   .then(res => res.json())
         .then(events => {
             let container = document.getElementById('events-container');
             if (!container) return;
@@ -26,8 +27,9 @@ function loadHomeData() {
         });
 
     // 2. Branches
-    fetch('http://localhost:3000/api/branches')
-        .then(res => res.json())
+   // fetch('http://localhost:3000/api/branches')
+   fetch('/api/branches')  
+   .then(res => res.json())
         .then(branches => {
             let container = document.getElementById('branches-container');
             if (!container) return;
@@ -62,8 +64,9 @@ function loadHomeData() {
 }
 
 // Gallery Highlights with Moving Effect
-fetch('http://localhost:3000/api/gallery')
-    .then(res => res.json())
+//fetch('http://localhost:3000/api/gallery')
+fetch('/api/gallery')  
+.then(res => res.json())
     .then(gallery => {
         let container = document.getElementById('home-gallery-container');
         if (!container) return;
@@ -89,7 +92,8 @@ fetch('http://localhost:3000/api/gallery')
     });
 
     // Fetch Daily Manna on Home Page
-fetch('http://localhost:3000/api/manna')
+//fetch('http://localhost:3000/api/manna')
+fetch('/api/manna')
     .then(res => res.json())
     .then(data => {
         let mannaEl = document.getElementById('daily-manna-text');
