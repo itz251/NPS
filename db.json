@@ -17,16 +17,31 @@
   "branches": [
     {
       "id": 1,
-      "name": "Main Sanctuary (Headquarters)",
-      "address": "Navayerusalem Prayer Hall, Main Road",
-      "timing": "Sunday 9:00 AM"
+      "name": "Head office and Gospel centre ",
+      "address": "NAVAYERUSALEM  PRARTHANA  SABHA  FOUNDATION  Plot No- 43, Beersheba Bhavan, Vardvinayak Appartment, Dhule, Maharashtra, India",
+      "timing": " "
     },
     {
       "id": 2,
-      "name": "North Branch Prayer House",
-      "address": "Grace Nagar, Sector 4",
-      "timing": "Friday 6:30 PM"
+      "name": "Prayer House",
+      "address": "NAVAYERUSALEM PRARTHANA SABHA Om building, Wadiboker Rd, Near Parus Mangal Karyalay, Deopur, Dhule,Maharashtra, India",
+      "timing": "Prayer time: 10:30 am to 1.00pm"
+    },
+    {
+      "id": 3,
+      "name": "Prayer House",
+      "address": "NAVAYERUSALEM PRARTHANA SABHA Bethel Sadan H No. 106Saraswati colony, Kannad (MCI),D: Sambhajinagar, Maharashtra, India.",
+      "timing": ""
     }
   ],
-  "manna": "विश्वास वह चीज़ है जो उम्मीद को हकीकत में बदल देती है। प्रभु आपके जीवन को शांति और आशीष से भर दे।"
+  "manna": [
+    {
+      "id": 1792934920434,
+      "text": "Commit your work to the Lord, and your plans will be established. Proverbs 16:3 ESV"
+    },
+    {
+      "id": 1,
+      "text": "विश्वास वह चीज़ है जो उम्मीद को हकीकत में बदल देती है। प्रभु आपके जीवन को शांति और आशीष से भर दे।"
+    }
+  ]
 }

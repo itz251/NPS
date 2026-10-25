@@ -63,6 +63,15 @@
 
             <h4 style="margin-top: 20px;">Manage Gallery (Photos & Videos)</h4>
             <div id="admin-gallery-list" style="margin-top: 10px; display:flex; gap:10px; flex-wrap:wrap;"></div>
+
+            <hr style="margin: 30px 0;">
+            <h4>Post / Update Daily Manna (सुविचार)</h4>
+            <div class="form-group">
+            <label>Daily Manna Text</label>
+            <textarea id="manna-text" placeholder="सुविचार यहाँ लिखें..."></textarea>
+            </div>
+            <button class="btn-submit" id="manna-btn" onclick="saveManna()">Post Daily Manna</button>
+            <div id="admin-manna-list" style="margin-top: 20px;"></div>
         </div>
     </div>
 
@@ -82,12 +91,13 @@
                 document.getElementById('admin-login').style.display = 'none';
                 document.getElementById('admin-controls').style.display = 'block';
                 loadAdminData();
-            } else { 
-                alert('Galat username ya password!'); 
+            } else {
+                alert('Galat username ya password!');
             }
         }
 
         let editId = null;
+        let mannaEditId = null;
 
         function saveEvent() {
             let title = document.getElementById('ev-title').value;
@@ -96,8 +106,7 @@
             if(!title || !time || !desc) { alert('Sabhi fields bharein!'); return; }
 
             let method = editId ? 'PUT' : 'POST';
-        //    let url = editId ? `http://localhost:3000/api/events/${editId}` : 'http://localhost:3000/api/events';
-             let url = editId ? `/api/events/${editId}` : '/api/events';
+            let url = editId ? `/api/events/${editId}` : '/api/events';
 
             fetch(url, {
                 method: method,
@@ -115,27 +124,23 @@
         }
 
         function loadAdminData() {
-            // Load Events
-           // fetch('http://localhost:3000/api/events')
-           fetch('/api/events')  
-           .then(res => res.json())
+            fetch('/api/events')
+            .then(res => res.json())
             .then(events => {
                 let list = document.getElementById('admin-events-list');
                 list.innerHTML = '<h4>Manage Events</h4>';
                 events.forEach(ev => {
                     list.innerHTML += `<div style="background:#f9f9f9; padding:8px; margin-top:5px; border:1px solid #ddd; display:flex; justify-content:space-between; align-items:center;">
-                        <span><b>${ev.title}</b></span>
+                        <span><b>${String(ev.title ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</b></span>
                         <div>
-                            <button onclick="editEvent(${ev.id}, '${ev.title}', '${ev.time}', '${ev.desc}')" style="background:#3498db; color:white; border:none; padding:4px 8px; cursor:pointer;">Edit</button>
+                            <button onclick='editEvent(${ev.id}, ${jsString(ev.title)}, ${jsString(ev.time)}, ${jsString(ev.desc)})' style="background:#3498db; color:white; border:none; padding:4px 8px; cursor:pointer;">Edit</button>
                             <button onclick="deleteEvent(${ev.id})" style="background:#e74c3c; color:white; border:none; padding:4px 8px; cursor:pointer;">Delete</button>
                         </div>
                     </div>`;
                 });
             });
 
-            // Load Gallery (Photos & Videos with Delete Button)
-           // fetch('http://localhost:3000/api/gallery')
-           fetch('/api/gallery')
+            fetch('/api/gallery')
             .then(res => res.json())
             .then(gallery => {
                 let list = document.getElementById('admin-gallery-list');
@@ -154,6 +159,7 @@
                     }
                 });
             });
+            loadMannaData();
         }
 
         function editEvent(id, title, time, desc) {
@@ -167,15 +173,14 @@
 
         function deleteEvent(id) {
             if(confirm('Event delete karna chahte hain?')) {
-              // fetch(`http://localhost:3000/api/events/${id}`, {method: 'DELETE'}).then(() => loadAdminData());
-              fetch(`/api/events/${id}`, {method: 'DELETE'}).then(() => loadAdminData());
+                fetch(`/api/events/${id}`, {method: 'DELETE'}).then(() => loadAdminData());
             }
         }
 
         function uploadPhoto() {
             let fileInput = document.getElementById('photo-file');
             if(fileInput.files.length === 0) { alert('Pehle photo select karein!'); return; }
-            
+
             let formData = new FormData();
             formData.append('photo', fileInput.files[0]);
 
@@ -188,9 +193,9 @@
                 loadAdminData();
             });
         }
-        
+
         function uploadYouTubeVideo() {
-            let url = document.getElementById('youtube-url').value;
+            let url = document.getElementById('youtube-url').value.trim();
             if(!url) { alert('Kripya YouTube URL darj karein!'); return; }
 
             fetch('/api/gallery/video', {
@@ -203,13 +208,143 @@
                 loadAdminData();
             });
         }
-            
+
         function deleteItem(id) {
             if(confirm('Isse delete karna chahte hain?')) {
-              // fetch(`http://localhost:3000/api/gallery/${id}`, {method: 'DELETE'}).then(() => loadAdminData());
-              fetch(`/api/gallery/${id}`, {method: 'DELETE'}).then(() => loadAdminData());
+                fetch(`/api/gallery/${id}`, {method: 'DELETE'}).then(() => loadAdminData());
             }
         }
+
+        function escapeJsString(value) {
+            return String(value ?? '')
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'")
+                .replace(/\r/g, '\\r')
+                .replace(/\n/g, '\\n');
+        }
+
+        function jsString(value) {
+            return JSON.stringify(String(value ?? ''))
+                .replace(/</g, '\\u003c')
+                .replace(/>/g, '\\u003e')
+                .replace(/&/g, '\\u0026');
+        }
+
+        function loadMannaData() {
+            fetch('/api/manna')
+            .then(res => {
+                if(!res.ok) throw new Error('Failed to load Daily Manna');
+                return res.json();
+            })
+            .then(items => {
+                let list = document.getElementById('admin-manna-list');
+                if (!list) {
+                    console.error('Daily Manna container not found');
+                    return;
+                }
+
+                list.innerHTML = '<h4>Daily Manna List</h4>';
+
+                if(!items || items.length === 0) {
+                    list.innerHTML += '<p style="color:#666;">No Daily Manna available.</p>';
+                    return;
+                }
+
+                items.forEach(item => {
+                    const displayText = String(item.text ?? '')
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;');
+
+                    list.innerHTML += `
+                        <div style="background:#f9f9f9; padding:10px; margin-top:8px; border:1px solid #ddd; display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+                            <div style="flex:1;">${displayText}</div>
+                            <div>
+                                <button onclick='editManna(${item.id}, ${jsString(item.text)})' style="background:#3498db; color:white; border:none; padding:4px 8px; cursor:pointer; margin-right:5px;">Edit</button>
+                                <button onclick="deleteManna(${item.id})" style="background:#e74c3c; color:white; border:none; padding:4px 8px; cursor:pointer;">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                const list = document.getElementById('admin-manna-list');
+                if (list) {
+                    list.innerHTML = '<p style="color:#d9534f;">Daily Manna load karne mein error.</p>';
+                }
+            });
+        }
+
+            function editManna(id, text) {
+            mannaEditId = id;
+            document.getElementById('manna-text').value = text;
+            document.getElementById('manna-btn').innerText = 'Update Daily Manna';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+            function updateManna() {
+            let textElement = document.getElementById('manna-text');
+            if (!textElement) {
+                alert('Form element nahi mila!');
+                return;
+            }
+
+            let text = textElement.value.trim();
+            if(!text) { alert('सुविचार दर्ज करें!'); return; }
+
+            let method = mannaEditId ? 'PUT' : 'POST';
+            let url = mannaEditId ? `/api/manna/${mannaEditId}` : '/api/manna';
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'admin-pass': '1234'
+                },
+                body: JSON.stringify({ text })
+            }).then(res => {
+                if(!res.ok) {
+                    return res.text().then(msg => {
+                        throw new Error(msg || 'Unauthorized action!');
+                    });
+                }
+                return res.text().then(() => ({}));
+            }).then(() => {
+                alert('Daily Manna successfully save ho gaya!');
+                mannaEditId = null;
+                document.getElementById('manna-btn').innerText = 'Post Daily Manna';
+                textElement.value = '';
+                loadAdminData();
+            }).catch(err => {
+                console.error(err);
+                alert(err.message || 'Daily Manna save karne mein error!');
+            });
+            }
+
+            function saveManna() {
+            updateManna();
+            }
+
+            function deleteManna(id) {
+            if(confirm('Kya aap is Daily Manna ko delete karna chahte hain?')) {
+                fetch(`/api/manna/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'admin-pass': '1234'
+                    }
+                }).then(res => {
+                    if(!res.ok) {
+                        alert('Unauthorized!');
+                        return;
+                    }
+                    loadAdminData();
+                }).catch(err => {
+                    console.error(err);
+                    alert('Daily Manna delete karne mein error!');
+                });
+                 }
+            }
     </script>
 </body>
 </html>

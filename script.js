@@ -91,11 +91,31 @@ fetch('/api/gallery')
         });
     });
 
-    // Fetch Daily Manna on Home Page
-//fetch('http://localhost:3000/api/manna')
+  
+// Fetch Daily Manna Safely
 fetch('/api/manna')
     .then(res => res.json())
     .then(data => {
         let mannaEl = document.getElementById('daily-manna-text');
-        if (mannaEl) mannaEl.innerText = data.manna;
+        if (!mannaEl) return;
+
+        // Check format: Array, Object, or String
+        if (Array.isArray(data) && data.length > 0) {
+            mannaEl.innerText = data[0].text || data[0].thought || data[0];
+        } else if (data && data.text) {
+            mannaEl.innerText = data.text;
+        } else if (data && data.thought) {
+            mannaEl.innerText = data.thought;
+        } else if (typeof data === 'string') {
+            mannaEl.innerText = data;
+        } else {
+            mannaEl.innerText = "विश्वास वह चीज़ है जो उम्मीद को हकीकत में बदल देती है।";
+        }
+    })
+    .catch(err => {
+        console.error("Manna fetch error:", err);
+        let mannaEl = document.getElementById('daily-manna-text');
+        if (mannaEl) {
+            mannaEl.innerText = "विश्वास वह चीज़ है जो उम्मीद को हकीकत में बदल देती है।";
+        }
     });
