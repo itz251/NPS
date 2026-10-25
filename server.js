@@ -114,3 +114,41 @@ app.put('/api/manna', (req, res) => {
     writeDB(db);
     res.json({ success: true, manna: db.manna });
 });
+async function handleFormSubmit(event) {
+    event.preventDefault(); // Stop default browser redirect
+    
+    const form = event.target;
+    const statusText = document.getElementById("form-status");
+    const submitBtn = document.getElementById("submit-btn");
+    
+    // Disable button while sending
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Sending...";
+
+    const data = new FormData(form);
+
+    try {
+        const response = await fetch(form.action, {
+            method: form.method,
+            body: data,
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            statusText.innerText = "Thank you! Your message has been sent to navayerusalem@gmail.com";
+            statusText.classList.remove("hidden");
+            form.reset();
+        } else {
+            statusText.innerText = "Oops! There was a problem submitting your form. Please try again.";
+            statusText.classList.remove("hidden");
+        }
+    } catch (error) {
+        statusText.innerText = "Oops! Network error. Please try again later.";
+        statusText.classList.remove("hidden");
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Send Message";
+    }
+}
